@@ -61,7 +61,7 @@ Contributions to PyTkQuiz are welcome! Please feel free to submit a Pull Request
 ## License
 
 Copyright 2024 Richard N. Anton. Available under the 3-clause BSD License.
-See [LICENSE]('LICENSE') for complete license.
+See [LICENSE](https://github.com/ranton256/pytkquiz/blob/main/LICENSE) for complete license.
 
 ## Contact
 
