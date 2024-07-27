@@ -9,6 +9,7 @@ import csv
 from collections import namedtuple
 
 
+
 class LanguageQuizApp:
     def __init__(self, master):
         self.master = master
@@ -86,23 +87,15 @@ class LanguageQuizApp:
         else:
             messagebox.showinfo("Quiz Completed", f"Quiz completed! Your final score is {self.score}")
 
-    def generate_sound_if_not_found(self, text, sound_path):
-        if not os.path.exists("sounds"):
-            os.mkdir("sounds")
-        if not os.path.exists(sound_path):
-            tts = gtts.gTTS(text)
-            tts.save(sound_path)
-
-    def image_path_for_word(self, option):
-        image_path = f"word_images/{option.image}"
-        return image_path
 
     def check_answer(self, selected_option):
         if selected_option == self.current_question:
             self.score += 1
             self.score_label.config(text=f"Score: {self.score}")
+            self.speak_text("Yes, that's correct!")
             messagebox.showinfo("Correct", f"That's correct! \n\nDefinition: {self.current_question.definition}")
         else:
+            self.speak_text("Sorry, that's incorrect!")
             messagebox.showinfo("Incorrect",
                                 f"Sorry, that's incorrect. The correct answer was {self.current_question.word}.\n\nDefinition: {self.current_question.definition}")
 
@@ -113,9 +106,23 @@ class LanguageQuizApp:
         playsound(sound_path)
 
     def sound_path_for_word(self, option):
-        return os.path.join("sounds", str(option.word).lower() + ".mp3")
+        return os.path.join("word_sounds", str(option.word).lower() + ".mp3")
 
+    def speak_text(self, text: str):
+        safe_name_chars = [c if c.isalnum() else '_' for c in text]
+        safe_name = ''.join(safe_name_chars)
+        sound_path = os.path.join("word_sounds", safe_name.lower() + ".mp3")
+        self.generate_sound_if_not_found(text, sound_path)
+        self.speak_word(sound_path)
 
+    def generate_sound_if_not_found(self, text, sound_path):
+        if not os.path.exists(sound_path):
+            tts = gtts.gTTS(text)
+            tts.save(sound_path)
+
+    def image_path_for_word(self, option):
+        image_path = f"word_images/{option.image}"
+        return image_path
 
 if __name__ == "__main__":
     root = tk.Tk()
