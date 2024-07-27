@@ -5,8 +5,9 @@
 - gTTS current one, must be online.
 - local/free https://pypi.org/project/pyttsx3/
 
-the images were generated with Gemini
+## Images
 
+The images were generated with Gemini and Dall-E(GPT4o)
 
 ## Images Needed Still
 
