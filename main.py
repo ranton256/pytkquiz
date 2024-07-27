@@ -78,15 +78,20 @@ class LanguageQuizApp:
                 btn.image = photo
                 btn.grid(row=0, column=i, padx=10)
 
-                speak_btn = tk.Button(self.image_frame, text="Speak", command=lambda x=option: self.speak_word(x, self.sound_path_for_word(x)))
+                speak_btn = tk.Button(self.image_frame, text="Speak", command=lambda x=option: self.speak_word(self.sound_path_for_word(x)))
                 speak_btn.grid(row=1, column=i, padx=10, pady=5)
 
                 sound_path = self.sound_path_for_word(option)
-                if not os.path.exists(sound_path):
-                    tts = gtts.gTTS(option.word)
-                    tts.save(sound_path)
+                self.generate_sound_if_not_found(option.word, sound_path)
         else:
             messagebox.showinfo("Quiz Completed", f"Quiz completed! Your final score is {self.score}")
+
+    def generate_sound_if_not_found(self, text, sound_path):
+        if not os.path.exists("sounds"):
+            os.mkdir("sounds")
+        if not os.path.exists(sound_path):
+            tts = gtts.gTTS(text)
+            tts.save(sound_path)
 
     def image_path_for_word(self, option):
         image_path = f"word_images/{option.image}"
@@ -104,16 +109,12 @@ class LanguageQuizApp:
         self.questions.remove(self.current_question)
         self.next_question()
 
-    def speak_word(self, option, sound_path):
-        if not os.path.exists("sounds"):
-            os.mkdir("sounds")
-
-
+    def speak_word(self, sound_path):
         playsound(sound_path)
 
     def sound_path_for_word(self, option):
         return os.path.join("sounds", str(option.word).lower() + ".mp3")
-    #os.remove("temp.mp3")
+
 
 
 if __name__ == "__main__":
