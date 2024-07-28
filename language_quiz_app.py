@@ -32,7 +32,8 @@ class LanguageQuizApp:
 
         self.next_btn = self.button_factory(master, text="Next Question", command=lambda: self.next_question())
         self.next_btn.pack(pady=10)
-        self.next_btn.config(state=DISABLED)
+
+        self.disable_next()
         self.score_label = self.label_factory(master, text="Score: 0", font=("Arial", 16))
         self.score_label.pack(pady=10)
         self.message_label = self.label_factory(master, text="Messages go here.", wraplength=450, font=("Arial", 20))
@@ -43,7 +44,23 @@ class LanguageQuizApp:
         self.current_question = None
         self.score = 0
 
+        master.bind("<space>", self.space_pressed)
+
         self.next_question()
+
+    def enable_next(self):
+        self.next_btn.config(state=NORMAL)
+        self.next_enabled = True
+
+    def disable_next(self):
+        self.next_btn.config(state=DISABLED)
+        self.next_enabled = False
+
+    def space_pressed(self, event):
+        print("you hit space")
+        if self.next_enabled:
+            self.next_question()
+
 
     def load_word_data(self, path):
         word_data = []
@@ -69,7 +86,7 @@ class LanguageQuizApp:
 
             self.word_label.config(text=self.current_question.word)
             self.message_label.config(text="")
-            self.next_btn.config(state=DISABLED)
+            self.disable_next()
             for widget in self.image_frame.winfo_children():
                 widget.destroy()
 
@@ -119,7 +136,7 @@ class LanguageQuizApp:
                 f"Sorry, that's incorrect. The correct answer was {self.current_question.word}.\n\nDefinition: {self.current_question.definition}")
             self.speak_text("Sorry, that's incorrect!")
 
-        self.next_btn.config(state=NORMAL)
+        self.enable_next()
 
     def speak_word(self, sound_path):
         playsound(sound_path)
