@@ -531,16 +531,6 @@ test = ["appdirs (==1.4.4)", "covdefaults (>=2.3)", "pytest (>=7.4.3)", "pytest-
 type = ["mypy (>=1.8)"]
 
 [[package]]
-name = "playsound"
-version = "1.3.0"
-description = "Pure Python, cross platform, single function module with no dependencies for playing sounds."
-optional = false
-python-versions = "*"
-files = [
-    {file = "playsound-1.3.0.tar.gz", hash = "sha256:cc6ed11d773034b0ef624e6bb4bf50f4b76b8414a59ce6d38afb89b423297ced"},
-]
-
-[[package]]
 name = "pluggy"
 version = "1.5.0"
 description = "plugin and hook calling mechanisms for python"
@@ -3546,6 +3536,17 @@ socks = ["PySocks (>=1.5.6,!=1.5.7)"]
 use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
+name = "types-playsound"
+version = "1.3.1.3"
+description = "Typing stubs for playsound"
+optional = false
+python-versions = "*"
+files = [
+    {file = "types-playsound-1.3.1.3.tar.gz", hash = "sha256:0a856b540ca4c61805d17ed9d8a838cb351355d9f78ce3c612ee208a3d6d93ab"},
+    {file = "types_playsound-1.3.1.3-py3-none-any.whl", hash = "sha256:6d055a2e276ed4d86c03e7fe4b3c4a5f50e00f73ae0d1104b1f353e10cb08caf"},
+]
+
+[[package]]
 name = "typing-extensions"
 version = "4.12.2"
 description = "Backported and Experimental Type Hints for Python 3.8+"
@@ -3610,4 +3611,4 @@ test = ["pytest (>=6.0.0)", "setuptools (>=65)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11.7"
-content-hash = "48a9c86da8717489fcaa5ed69e167fd12896fb58a2a4998011fdcd5ecb77601e"
+content-hash = "3dcb13af7ff70f16c5230840ccc970d2f7ba1977f04b67337fb3b09ae058660f"

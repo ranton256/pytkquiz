@@ -5,7 +5,7 @@ import tkinter as tk
 from collections import namedtuple
 from tkinter import DISABLED, NORMAL, messagebox
 
-import gtts
+import gtts  # type: ignore
 from PIL import Image, ImageTk
 from playsound import playsound
 
