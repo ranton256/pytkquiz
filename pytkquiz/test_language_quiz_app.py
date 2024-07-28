@@ -1,7 +1,8 @@
 import unittest
 from unittest.mock import patch
 
-from language_quiz_app import LanguageQuizApp, WordData
+from language_quiz_app import LanguageQuizApp
+from quiz_logic import WordData
 
 
 class FakeLabel(dict):
@@ -21,34 +22,6 @@ class FakeLabel(dict):
 class TestLanguageQuizApp(unittest.TestCase):
     def setUp(self):
         self.app = LanguageQuizApp(label_factory=FakeLabel)
-
-    @patch("language_quiz_app.os.path.exists")
-    @patch("language_quiz_app.csv.DictReader")
-    @patch("builtins.open")
-    def test_load_word_data(
-            self, _mock_open, mock_csv_dict_reader, mock_os_path_exists
-    ):
-        mock_csv_dict_reader.return_value = iter(
-            [
-                {
-                    "Word": "cat",
-                    "Image": "cat.jpg",
-                    "Sound": "cat.mp3",
-                    "Definition": "A small domesticated carnivorous mammal",
-                }
-            ]
-        )
-        mock_os_path_exists.return_value = True
-
-        word_data = self.app.load_word_data("dummy_path")
-
-        self.assertEqual(len(word_data), 1)
-        self.assertEqual(word_data[0].word, "cat")
-        self.assertEqual(word_data[0].image, "cat.jpg")
-        self.assertEqual(word_data[0].sound, "cat.mp3")
-        self.assertEqual(
-            word_data[0].definition, "A small domesticated carnivorous mammal"
-        )
 
     @patch("language_quiz_app.gtts.gTTS.save")
     @patch("language_quiz_app.os.path.exists")
@@ -83,10 +56,11 @@ class TestLanguageQuizApp(unittest.TestCase):
                 "cat", "cat.jpg", "cat.mp3", "A small domesticated carnivorous mammal"
             )
         ]
-        self.app.current_question = word_data[0]
+        #self.app.current_question = word_data[0]
         self.app.questions = word_data
+        self.app.next_question()
 
-        self.app.check_answer(word_data[0])
+        self.app.check_answer(self.app.current_question)
 
         self.assertEqual(self.app.score, 1)
         self.assertEqual(mock_speak_text.call_args[0][0], "Yes, that's correct!")
@@ -100,8 +74,7 @@ class TestLanguageQuizApp(unittest.TestCase):
                 "cat", "cat.jpg", "cat.mp3", "A small domesticated carnivorous mammal"
             )
         ]
-        self.app.current_question = word_data[0]
-        self.app.questions = word_data
+        self.app.next_question()
 
         self.app.check_answer(
             WordData(
@@ -112,33 +85,6 @@ class TestLanguageQuizApp(unittest.TestCase):
         self.assertEqual(self.app.score, 0)
         self.assertEqual(mock_speak_text.call_args[0][0], "Sorry, that's incorrect!")
         self.assertTrue("incorrect" in self.app.get_message())
-
-
-class TestImagePathForWord(unittest.TestCase):
-    def setUp(self):
-        self.app = LanguageQuizApp(label_factory=FakeLabel)
-        self.app.root_dir = "/test/root/dir"
-
-    def test_image_path_for_word_valid(self):
-        word_data = WordData("cat", "cat.jpg", "cat.mp3", "A feline animal")
-        expected_path = "/test/root/dir/word_images/cat.jpg"
-        self.assertEqual(self.app.image_path_for_word(word_data), expected_path)
-
-    def test_image_path_for_word_no_image(self):
-        word_data = WordData("dog", "", "dog.mp3", "A canine animal")
-        expected_path = "/test/root/dir/word_images/"
-        self.assertEqual(self.app.image_path_for_word(word_data), expected_path)
-
-    def test_image_path_for_word_different_extension(self):
-        word_data = WordData("bird", "bird.png", "bird.mp3", "A flying animal")
-        expected_path = "/test/root/dir/word_images/bird.png"
-        self.assertEqual(self.app.image_path_for_word(word_data), expected_path)
-
-    @patch("os.path.join")
-    def test_image_path_for_word_os_join_called(self, mock_join):
-        word_data = WordData("fish", "fish.jpg", "fish.mp3", "An aquatic animal")
-        self.app.image_path_for_word(word_data)
-        mock_join.assert_called_once_with(self.app.root_dir, "word_images", "fish.jpg")
 
 
 class TestGenerateSoundIfNotFound(unittest.TestCase):

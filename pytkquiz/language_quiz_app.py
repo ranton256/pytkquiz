@@ -10,9 +10,9 @@ import gtts  # type: ignore
 from PIL import Image, ImageTk
 from playsound import playsound
 
-N_CHOICES = 3
+from quiz_logic import QuizLogic
 
-WordData = namedtuple("WordData", ["word", "image", "sound", "definition"])
+N_CHOICES = 3
 
 
 class LanguageQuizApp:
@@ -60,7 +60,6 @@ class LanguageQuizApp:
 
         self.label_factory = label_factory
         self.button_factory = button_factory
-
         self.image_size = image_size
 
         if self.master:
@@ -90,9 +89,8 @@ class LanguageQuizApp:
 
         words_path = os.path.join(self.root_dir, "words.csv")
 
-        self.questions = self.load_word_data(words_path)
-        self.current_question = None
-        self.score = 0
+        self.quiz_logic = QuizLogic(root_dir=self.root_dir)
+        self.quiz_logic.load_word_data(words_path)
 
         if master:
             master.bind("<space>", self.space_pressed)
@@ -126,78 +124,38 @@ class LanguageQuizApp:
         if self.next_enabled:
             self.next_question()
 
-    def load_word_data(self, path):
-        """
-        Loads word data from a CSV file at the given path.
-
-        This method reads a CSV file containing word data (word, image, sound, and definition)
-        and returns a list of `WordData` namedtuple objects representing the loaded words. If any
-        image files are missing, those words are skipped and a message is printed.
-
-        Args:
-            path (str): The file path to the CSV file containing the word data.
-
-        Returns:
-            list[WordData]: A list of `WordData` namedtuple objects containing the loaded word data.
-        """
-        word_data = []
-        with open(path, newline="", encoding="utf-8") as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                new_word = WordData(
-                    word=row["Word"],
-                    image=row["Image"],
-                    sound=row["Sound"],
-                    definition=row["Definition"],
-                )
-                image_path = self.image_path_for_word(new_word)
-                if not os.path.exists(image_path):
-                    print(
-                        f"Skipping word {new_word.word}, missing image file {image_path}"
-                    )
-                else:
-                    word_data.append(new_word)
-        return word_data
-
     def next_question(self):
-        if self.questions:
-            options = random.sample(self.questions, N_CHOICES)
-            self.current_question = options[0]
-            random.shuffle(options)
+        options = self.quiz_logic.next_question()
+        current_question = self.quiz_logic.current_question
 
-            self.word_label.config(text=self.current_question.word)
-            self.message_label.config(text="")
-            self.disable_next()
-            for widget in self.image_frame.winfo_children():
-                widget.destroy()
+        self.word_label.config(text=current_question.word)
+        self.message_label.config(text="")
+        self.disable_next()
+        for widget in self.image_frame.winfo_children():
+            widget.destroy()
 
-            for i, option in enumerate(options):
-                photo = self.get_word_image(option)
-                btn = self.button_factory(
-                    self.image_frame,
-                    image=photo,
-                    command=lambda opt=option: self.check_answer(opt),
-                )
-                btn.image = photo
-                btn.grid(row=0, column=i, padx=10, pady=10)
+        for i, option in enumerate(options):
+            photo = self.get_word_image(option)
+            btn = self.button_factory(
+                self.image_frame,
+                image=photo,
+                command=lambda opt=option: self.check_answer(opt),
+            )
+            btn.image = photo
+            btn.grid(row=0, column=i, padx=10, pady=10)
 
-                speak_btn = tk.Button(
-                    self.image_frame,
-                    text="🔊Speak",
-                    command=lambda x=option: self.speak_word(
-                        self.sound_path_for_word(x)
-                    ),
-                )
-                speak_btn.grid(row=1, column=i, padx=10, pady=5)
+            speak_btn = tk.Button(
+                self.image_frame,
+                text="🔊Speak",
+                command=lambda x=option: self.speak_word(
+                    self.quiz_logic.sound_path_for_word(x)
+                ),
+            )
+            speak_btn.grid(row=1, column=i, padx=10, pady=5)
 
-                sound_path = self.sound_path_for_word(option)
-                self.generate_sound_if_not_found(option.word, sound_path)
-        else:
-            if self.master:
-                messagebox.showinfo(
-                    "Quiz Completed",
-                    f"Quiz completed! Your final score is {self.score}",
-                )
+            sound_path = self.quiz_logic.sound_path_for_word(option)
+            self.generate_sound_if_not_found(option.word, sound_path)
+
 
     def get_word_image(self, option):
         """
@@ -211,7 +169,7 @@ class LanguageQuizApp:
         """
         if not self.master:
             return None
-        img = Image.open(self.image_path_for_word(option))
+        img = Image.open(self.quiz_logic.image_path_for_word(option))
         img = img.resize((self.image_size, self.image_size))
         photo = ImageTk.PhotoImage(img)
         return photo
@@ -225,17 +183,16 @@ class LanguageQuizApp:
         return self.message_label["text"]
 
     def check_answer(self, selected_option):
-        if selected_option == self.current_question:
-            self.score += 1
-            self.score_label.config(text=f"Score: {self.score}")
+        if self.quiz_logic.check_answer(selected_option):
+            self.score_label.config(text=f"Score: {self.quiz_logic.score}")
             self.set_message(
-                f"That's correct! \n\nDefinition: {self.current_question.definition}"
+                f"That's correct! \n\nDefinition: {self.quiz_logic.current_question.definition}"
             )
             self.speak_text("Yes, that's correct!")
         else:
             self.set_message(
-                f"""Sorry, that's incorrect. The correct answer was {self.current_question.word}.
-                Definition: {self.current_question.definition}"""
+                f"""Sorry, that's incorrect. The correct answer was {self.quiz_logic.current_question.word}.
+                Definition: {self.quiz_logic.current_question.definition}"""
             )
             self.speak_text("Sorry, that's incorrect!")
 
@@ -244,11 +201,6 @@ class LanguageQuizApp:
     @staticmethod
     def speak_word(sound_path):
         playsound(sound_path)
-
-    def sound_path_for_word(self, option):
-        return os.path.join(
-            self.root_dir, "word_sounds", str(option.word).lower() + ".mp3"
-        )
 
     def speak_text(self, text: str):
         """
@@ -284,18 +236,13 @@ class LanguageQuizApp:
             tts = gtts.gTTS(text)
             tts.save(sound_path)
 
-    def image_path_for_word(self, option):
-        """
-        Returns the path to the image file for the given word option.
+    @property
+    def score(self):
+        return self.quiz_logic.score
 
-        Args:
-          option (WordOption): The word option to get the image path for.
-
-        Returns:
-          str: The path to the image file for the given word option.
-        """
-        image_path = os.path.join(self.root_dir, "word_images", option.image)
-        return image_path
+    @property
+    def current_question(self):
+        return self.quiz_logic.current_question
 
 
 if __name__ == "__main__":
