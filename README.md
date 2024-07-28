@@ -24,35 +24,42 @@ To run PyTkQuiz, you'll need Python 3.x installed on your system. Follow these s
    cd pytkquiz
    ```
 
-3. Install the required dependencies:
+3. Install Poetry
+
+   If you do not already have poetry installed, you can install it with pipx.
+   
+   ```shell
+   pipx install poetry
    ```
-   pip install -r requirements.txt
+
+   For other installation options, see the [documentation](https://python-poetry.org/docs/).
+
+4. Install the required dependencies:
+
+   From inside the `pytkquiz` directory.
+   ```
+   poetry install
    ```
 
 ## Usage
 
-1. Ensure you have a CSV file named `words.csv` in the project directory, containing your word list in the following format:
-   ```
-   Word,Image,Sound,Definition
-   Apple,apple.jpg,apple.mp3,A round fruit with red, yellow, or green skin and white flesh
-   ...
-   ```
+1. Run the commnad using poetry run.
 
-2. Place corresponding image files (e.g., `apple.jpg`) in the `word_images` folder.
-
-3. Run the application:
-   ```
-   python main.py
+   ```shell
+    poetry run python pytkquiz/language_quiz_app.py
    ```
 
-4. Click on the image that matches the displayed word. Use the "Speak" button to hear the pronunciation of each option.
+2. Click on the image that matches the displayed word. Use the "Speak" button to hear the pronunciation of each option.
 
-5. Your score will be displayed and updated as you progress through the quiz.
+3. Click the next button or press the spacebar to go to the next question.
+
+4. Your score will be displayed and updated as you progress through the quiz.
 
 ## Customization
 
 You can easily customize the word list by modifying the `words.csv` file.
-Ensure that you have corresponding image files for any new words you add.
+Ensure that you have corresponding image files for any new words you add in the `word_images` subdirectory.
+Sound files will be auto-generated as needed.
 
 ## Contributing
 

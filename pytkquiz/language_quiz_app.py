@@ -75,7 +75,8 @@ class LanguageQuizApp:
         self.next_btn.config(state=DISABLED)
         self.next_enabled = False
 
-    def space_pressed(self):
+    def space_pressed(self, event):
+        print(f"You pressed space: {event}")
         if self.next_enabled:
             self.next_question()
 
