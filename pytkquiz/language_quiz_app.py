@@ -5,9 +5,10 @@ from typing import Optional, Callable
 
 import gtts  # type: ignore
 from PIL import Image, ImageTk
+from PIL.ImageTk import PhotoImage
 from playsound import playsound
 
-from quiz_logic import QuizLogic
+from quiz_logic import QuizLogic, WordData
 
 N_CHOICES = 3
 
@@ -37,6 +38,7 @@ class LanguageQuizApp:
             frame_factory: Callable[..., tk.Frame] = tk.Frame,
             label_factory: Callable[..., tk.Label] = tk.Label,
             button_factory: Callable[..., tk.Button] = tk.Button,
+            image_factory: Callable[..., ImageTk.PhotoImage] = ImageTk.PhotoImage,
     ) -> None:
         """
         Initializes the LanguageQuizApp instance with the provided configuration.
@@ -56,7 +58,10 @@ class LanguageQuizApp:
         self.root_dir = os.path.abspath(os.path.join(__file__, "..", ".."))
 
         self.label_factory = label_factory
+        self.frame_factory =frame_factory
         self.button_factory = button_factory
+        self.image_factory = image_factory
+
         self.image_size = image_size
 
         if self.master:
@@ -66,7 +71,7 @@ class LanguageQuizApp:
         self.word_label = self.label_factory(master, text="", font=("Arial", 24))
         self.word_label.pack(pady=20)
 
-        self.image_frame = frame_factory(master)
+        self.image_frame = self.frame_factory(master)
         self.image_frame.pack(pady=20)
 
         self.next_btn = self.button_factory(
@@ -141,7 +146,7 @@ class LanguageQuizApp:
             btn.image = photo
             btn.grid(row=0, column=i, padx=10, pady=10)
 
-            speak_btn = tk.Button(
+            speak_btn = self.button_factory(
                 self.image_frame,
                 text="🔊Speak",
                 command=lambda x=option: self.speak_word(
@@ -153,34 +158,32 @@ class LanguageQuizApp:
             sound_path = self.quiz_logic.sound_path_for_word(option)
             self.generate_sound_if_not_found(option.word, sound_path)
 
-
-    def get_word_image(self, option):
+    def get_word_image(self, option: WordData) -> PhotoImage or None:
         """
         Get the Tkinter PhotoImage object for the image associated with the given word option.
 
         Args:
-            option (Word): The word option to get the image for.
+            option (WordData): The word option to get the image for.
 
         Returns:
             PhotoImage or None: The Tkinter PhotoImage object for the image, or None if the image file does not exist.
         """
-        if not self.master:
-            return None
         img = Image.open(self.quiz_logic.image_path_for_word(option))
         img = img.resize((self.image_size, self.image_size))
-        photo = ImageTk.PhotoImage(img)
+        photo = self.image_factory(img)
         return photo
 
-    def set_message(self, msg):
+    def set_message(self, msg: str) -> None:
         """Set the currently displayed message for the user."""
         self.message_label.config(text=msg)
 
-    def get_message(self):
+    def get_message(self) -> str:
         """Return the currently displayed message."""
         return self.message_label["text"]
 
-    def check_answer(self, selected_option):
-        if self.quiz_logic.check_answer(selected_option):
+    def check_answer(self, selected_option: WordData) -> bool:
+        correct =  self.quiz_logic.check_answer(selected_option)
+        if correct:
             self.score_label.config(text=f"Score: {self.quiz_logic.score}")
             self.set_message(
                 f"That's correct! \n\nDefinition: {self.quiz_logic.current_question.definition}"
@@ -194,12 +197,13 @@ class LanguageQuizApp:
             self.speak_text("Sorry, that's incorrect!")
 
         self.enable_next()
+        return correct
 
     @staticmethod
-    def speak_word(sound_path):
+    def speak_word(sound_path: str) -> None:
         playsound(sound_path)
 
-    def speak_text(self, text: str):
+    def speak_text(self, text: str) -> None:
         """
         Speaks the given text by generating an audio file for it and playing it.
 

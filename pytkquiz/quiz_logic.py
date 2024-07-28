@@ -31,7 +31,8 @@ class QuizLogic:
                     )
                 else:
                     word_data.append(new_word)
-        self.questions = word_data
+        self.set_questions(word_data)
+
         return word_data
 
     def next_question(self):
@@ -59,3 +60,6 @@ class QuizLogic:
         return os.path.join(
             self.root_dir, "word_sounds", str(option.word).lower() + ".mp3"
         )
+
+    def set_questions(self, word_data):
+        self.questions = word_data
