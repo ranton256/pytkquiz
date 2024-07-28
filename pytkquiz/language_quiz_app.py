@@ -17,7 +17,8 @@ WordData = namedtuple("WordData", ["word", "image", "sound", "definition"])
 
 class LanguageQuizApp:
     """
-    The `LanguageQuizApp` class is the main application for a language quiz. It provides a graphical user interface (GUI) for displaying word information, allowing users to select answers, and tracking the user's score.
+    The `LanguageQuizApp` provides a graphical user interface (GUI) for displaying word information,
+    allowing users to select answers, and tracking the user's score.
 
     The class has the following key features:
 
@@ -28,7 +29,8 @@ class LanguageQuizApp:
     - Provides functionality to speak the word and its definition using text-to-speech.
     - Handles the overall flow of the quiz, including advancing to the next question.
 
-    The class can be customized by providing different factories for the GUI elements (frames, labels, buttons) and the image size.
+    The class can be customized by providing different factories for the GUI elements (frames, labels, buttons)
+    and the image size.
     """
 
     def __init__(
@@ -38,7 +40,7 @@ class LanguageQuizApp:
             frame_factory: Callable[..., tk.Frame] = tk.Frame,
             label_factory: Callable[..., tk.Label] = tk.Label,
             button_factory: Callable[..., tk.Button] = tk.Button,
-        ) -> None:
+    ) -> None:
         """
         Initializes the LanguageQuizApp instance with the provided configuration.
 
@@ -49,7 +51,8 @@ class LanguageQuizApp:
             label_factory (Callable[..., tk.Label]): A factory function to create Tkinter labels.
             button_factory (Callable[..., tk.Button]): A factory function to create Tkinter buttons.
 
-        The constructor sets up the initial state of the application, including the GUI elements, score tracking, and loading the word data. It also binds the space key press event to the `next_question` method.
+        The constructor sets up the initial state of the application, including the GUI elements, score tracking,
+        and loading the word data. It also binds the space key press event to the `next_question` method.
         """
         self.master = master
         self.next_enabled = False
@@ -81,7 +84,7 @@ class LanguageQuizApp:
         )
         self.score_label.pack(pady=10)
         self.message_label = self.label_factory(
-            master, text="Messages go here.", wraplength=450, font=("Arial", 20)
+            master, text="Messages go here.", wraplength=450, font=("Arial", 20), justify="left"
         )
         self.message_label.pack(pady=10)
 
@@ -135,7 +138,7 @@ class LanguageQuizApp:
             path (str): The file path to the CSV file containing the word data.
 
         Returns:
-            list[WordData]: A list of `WordData` namedtuples containing the loaded word data.
+            list[WordData]: A list of `WordData` namedtuple objects containing the loaded word data.
         """
         word_data = []
         with open(path, newline="", encoding="utf-8") as csvfile:
@@ -196,7 +199,6 @@ class LanguageQuizApp:
                     f"Quiz completed! Your final score is {self.score}",
                 )
 
-
     def get_word_image(self, option):
         """
         Get the Tkinter PhotoImage object for the image associated with the given word option.
@@ -232,7 +234,8 @@ class LanguageQuizApp:
             self.speak_text("Yes, that's correct!")
         else:
             self.set_message(
-                f"Sorry, that's incorrect. The correct answer was {self.current_question.word}.\n\nDefinition: {self.current_question.definition} "
+                f"""Sorry, that's incorrect. The correct answer was {self.current_question.word}.
+                Definition: {self.current_question.definition}"""
             )
             self.speak_text("Sorry, that's incorrect!")
 
