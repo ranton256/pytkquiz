@@ -10,8 +10,9 @@ class FakeLabel(dict):
         self.master = master
         self.update(**kwargs)
 
-    def pack(self, _pady=None):
-        pass
+    def pack(self, pady=None):
+        # mostly to make lint happy.
+        print(f"pack received, pady:{pady}")
 
     def config(self, **kwargs):
         self.update(kwargs)
@@ -24,7 +25,9 @@ class TestLanguageQuizApp(unittest.TestCase):
     @patch("language_quiz_app.os.path.exists")
     @patch("language_quiz_app.csv.DictReader")
     @patch("builtins.open")
-    def test_load_word_data(self, _mock_open, mock_csv_dict_reader, mock_os_path_exists):
+    def test_load_word_data(
+        self, _mock_open, mock_csv_dict_reader, mock_os_path_exists
+    ):
         mock_csv_dict_reader.return_value = iter(
             [
                 {
