@@ -4,6 +4,7 @@ import random
 import tkinter as tk
 from collections import namedtuple
 from tkinter import DISABLED, NORMAL, messagebox
+from typing import Optional, Callable
 
 import gtts  # type: ignore
 from PIL import Image, ImageTk
@@ -13,14 +14,41 @@ N_CHOICES = 3
 
 
 class LanguageQuizApp:
+    """
+    The `LanguageQuizApp` class is the main application for a language quiz. It provides a graphical user interface (GUI) for displaying word information, allowing users to select answers, and tracking the user's score.
+
+    The class has the following key features:
+
+    - Loads word data from a CSV file and presents a random selection of words to the user.
+    - Displays the word and a set of images representing possible answers.
+    - Allows the user to select an answer and provides feedback on whether the answer is correct.
+    - Keeps track of the user's score and displays it.
+    - Provides functionality to speak the word and its definition using text-to-speech.
+    - Handles the overall flow of the quiz, including advancing to the next question.
+
+    The class can be customized by providing different factories for the GUI elements (frames, labels, buttons) and the image size.
+    """
+
     def __init__(
-        self,
-        master=None,
-        image_size=180,
-        frame_factory=tk.Frame,
-        label_factory=tk.Label,
-        button_factory=tk.Button,
-    ):
+            self,
+            master: Optional[tk.Tk] = None,
+            image_size: int = 180,
+            frame_factory: Callable[..., tk.Frame] = tk.Frame,
+            label_factory: Callable[..., tk.Label] = tk.Label,
+            button_factory: Callable[..., tk.Button] = tk.Button,
+        ) -> None:
+        """
+        Initializes the LanguageQuizApp instance with the provided configuration.
+
+        Args:
+            master (Optional[tk.Tk]): The root Tkinter window for the application.
+            image_size (int): The size of the images to be displayed in the quiz.
+            frame_factory (Callable[..., tk.Frame]): A factory function to create Tkinter frames.
+            label_factory (Callable[..., tk.Label]): A factory function to create Tkinter labels.
+            button_factory (Callable[..., tk.Button]): A factory function to create Tkinter buttons.
+
+        The constructor sets up the initial state of the application, including the GUI elements, score tracking, and loading the word data. It also binds the space key press event to the `next_question` method.
+        """
         self.master = master
         self.next_enabled = False
         self.root_dir = os.path.abspath(os.path.join(__file__, "..", ".."))
@@ -68,10 +96,24 @@ class LanguageQuizApp:
         self.next_question()
 
     def enable_next(self):
+        """
+        Enable the 'Next' button and set the next_enabled flag to True.
+
+        This method configures the next_btn widget to be in a normal (clickable) state
+        and sets the next_enabled attribute to True, allowing the user to proceed
+        to the next question.
+        """
         self.next_btn.config(state=NORMAL)
         self.next_enabled = True
 
     def disable_next(self):
+        """
+        Disable the 'Next' button and set the next_enabled flag to False.
+
+        This method configures the next_btn widget to be in a disabled (non-clickable) state
+        and sets the next_enabled attribute to False, preventing the user from proceeding
+        to the next question until the current question is answered correctly.
+        """
         self.next_btn.config(state=DISABLED)
         self.next_enabled = False
 
@@ -81,6 +123,19 @@ class LanguageQuizApp:
             self.next_question()
 
     def load_word_data(self, path):
+        """
+        Loads word data from a CSV file at the given path.
+
+        This method reads a CSV file containing word data (word, image, sound, and definition)
+        and returns a list of `WordData` namedtuple objects representing the loaded words. If any
+        image files are missing, those words are skipped and a message is printed.
+
+        Args:
+            path (str): The file path to the CSV file containing the word data.
+
+        Returns:
+            list[WordData]: A list of `WordData` namedtuples containing the loaded word data.
+        """
         word_data = []
         with open(path, newline="", encoding="utf-8") as csvfile:
             reader = csv.DictReader(csvfile)
@@ -140,7 +195,17 @@ class LanguageQuizApp:
                     f"Quiz completed! Your final score is {self.score}",
                 )
 
+
     def get_word_image(self, option):
+        """
+        Get the Tkinter PhotoImage object for the image associated with the given word option.
+
+        Args:
+            option (Word): The word option to get the image for.
+
+        Returns:
+            PhotoImage or None: The Tkinter PhotoImage object for the image, or None if the image file does not exist.
+        """
         if not self.master:
             return None
         img = Image.open(self.image_path_for_word(option))
@@ -149,9 +214,11 @@ class LanguageQuizApp:
         return photo
 
     def set_message(self, msg):
+        """Set the currently displayed message for the user."""
         self.message_label.config(text=msg)
 
     def get_message(self):
+        """Return the currently displayed message."""
         return self.message_label["text"]
 
     def check_answer(self, selected_option):
@@ -170,7 +237,8 @@ class LanguageQuizApp:
 
         self.enable_next()
 
-    def speak_word(self, sound_path):
+    @staticmethod
+    def speak_word(sound_path):
         playsound(sound_path)
 
     def sound_path_for_word(self, option):
@@ -179,6 +247,15 @@ class LanguageQuizApp:
         )
 
     def speak_text(self, text: str):
+        """
+        Speaks the given text by generating an audio file for it and playing it.
+
+        Args:
+            text (str): The text to be spoken.
+
+        Returns:
+            None
+        """
         safe_name_chars = [c if c.isalnum() else "_" for c in text]
         safe_name = "".join(safe_name_chars)
         sound_path = os.path.join(
@@ -187,12 +264,32 @@ class LanguageQuizApp:
         self.generate_sound_if_not_found(text, sound_path)
         self.speak_word(sound_path)
 
-    def generate_sound_if_not_found(self, text, sound_path):
+    @staticmethod
+    def generate_sound_if_not_found(text, sound_path: str):
+        """
+        Generates a sound file for the given text if it doesn't already exist.
+
+        Args:
+            text (str): The text to generate the sound file for.
+            sound_path (str): The path to save the generated sound file.
+
+        Returns:
+            None
+        """
         if not os.path.exists(sound_path):
             tts = gtts.gTTS(text)
             tts.save(sound_path)
 
     def image_path_for_word(self, option):
+        """
+        Returns the path to the image file for the given word option.
+
+        Args:
+          option (WordOption): The word option to get the image path for.
+
+        Returns:
+          str: The path to the image file for the given word option.
+        """
         image_path = os.path.join(self.root_dir, "word_images", option.image)
         return image_path
 

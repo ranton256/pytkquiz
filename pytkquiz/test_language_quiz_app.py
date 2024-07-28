@@ -26,7 +26,7 @@ class TestLanguageQuizApp(unittest.TestCase):
     @patch("language_quiz_app.csv.DictReader")
     @patch("builtins.open")
     def test_load_word_data(
-        self, _mock_open, mock_csv_dict_reader, mock_os_path_exists
+            self, _mock_open, mock_csv_dict_reader, mock_os_path_exists
     ):
         mock_csv_dict_reader.return_value = iter(
             [
@@ -112,6 +112,68 @@ class TestLanguageQuizApp(unittest.TestCase):
         self.assertEqual(self.app.score, 0)
         self.assertEqual(mock_speak_text.call_args[0][0], "Sorry, that's incorrect!")
         self.assertTrue("incorrect" in self.app.get_message())
+
+
+class TestImagePathForWord(unittest.TestCase):
+    def setUp(self):
+        self.app = LanguageQuizApp(label_factory=FakeLabel)
+        self.app.root_dir = "/test/root/dir"
+
+    def test_image_path_for_word_valid(self):
+        word_data = self.app.WordData("cat", "cat.jpg", "cat.mp3", "A feline animal")
+        expected_path = "/test/root/dir/word_images/cat.jpg"
+        self.assertEqual(self.app.image_path_for_word(word_data), expected_path)
+
+    def test_image_path_for_word_no_image(self):
+        word_data = self.app.WordData("dog", "", "dog.mp3", "A canine animal")
+        expected_path = "/test/root/dir/word_images/"
+        self.assertEqual(self.app.image_path_for_word(word_data), expected_path)
+
+    def test_image_path_for_word_different_extension(self):
+        word_data = self.app.WordData("bird", "bird.png", "bird.mp3", "A flying animal")
+        expected_path = "/test/root/dir/word_images/bird.png"
+        self.assertEqual(self.app.image_path_for_word(word_data), expected_path)
+
+    @patch("os.path.join")
+    def test_image_path_for_word_os_join_called(self, mock_join):
+        word_data = self.app.WordData("fish", "fish.jpg", "fish.mp3", "An aquatic animal")
+        self.app.image_path_for_word(word_data)
+        mock_join.assert_called_once_with(self.app.root_dir, "word_images", "fish.jpg")
+
+
+class TestGenerateSoundIfNotFound(unittest.TestCase):
+    def setUp(self):
+        self.app = LanguageQuizApp(label_factory=FakeLabel)
+
+    @patch("language_quiz_app.os.path.exists")
+    @patch("language_quiz_app.gtts.gTTS")
+    def test_generate_sound_if_not_found_existing_file(self, mock_gtts, mock_exists):
+        mock_exists.return_value = True
+        self.app.generate_sound_if_not_found("hello", "hello.mp3")
+        mock_gtts.assert_not_called()
+
+    @patch("language_quiz_app.os.path.exists")
+    @patch("language_quiz_app.gtts.gTTS")
+    def test_generate_sound_if_not_found_new_file(self, mock_gtts, mock_exists):
+        mock_exists.return_value = False
+        mock_tts_instance = mock_gtts.return_value
+        self.app.generate_sound_if_not_found("world", "world.mp3")
+        mock_gtts.assert_called_once_with("world")
+        mock_tts_instance.save.assert_called_once_with("world.mp3")
+
+    @patch("language_quiz_app.os.path.exists")
+    @patch("language_quiz_app.gtts.gTTS")
+    def test_generate_sound_if_not_found_empty_text(self, mock_gtts, mock_exists):
+        mock_exists.return_value = False
+        self.app.generate_sound_if_not_found("", "empty.mp3")
+        mock_gtts.assert_called_once_with("")
+
+    @patch("language_quiz_app.os.path.exists")
+    @patch("language_quiz_app.gtts.gTTS")
+    def test_generate_sound_if_not_found_special_characters(self, mock_gtts, mock_exists):
+        mock_exists.return_value = False
+        self.app.generate_sound_if_not_found("Hello, World!", "special.mp3")
+        mock_gtts.assert_called_once_with("Hello, World!")
 
 
 if __name__ == "__main__":
