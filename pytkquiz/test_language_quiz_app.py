@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from language_quiz_app import LanguageQuizApp
+from language_quiz_app import LanguageQuizApp, WordData
 
 
 class FakeLabel(dict):
@@ -63,7 +63,7 @@ class TestLanguageQuizApp(unittest.TestCase):
     @patch("language_quiz_app.random.sample")
     def test_next_question(self, mock_random_sample, mock_random_choice):
         word_data = [
-            self.app.WordData(
+            WordData(
                 "cat", "cat.jpg", "cat.mp3", "A small domesticated carnivorous mammal"
             )
         ]
@@ -79,7 +79,7 @@ class TestLanguageQuizApp(unittest.TestCase):
     @patch("language_quiz_app.LanguageQuizApp.speak_text")
     def test_check_answer_correct(self, mock_speak_text):
         word_data = [
-            self.app.WordData(
+            WordData(
                 "cat", "cat.jpg", "cat.mp3", "A small domesticated carnivorous mammal"
             )
         ]
@@ -96,7 +96,7 @@ class TestLanguageQuizApp(unittest.TestCase):
     @patch("language_quiz_app.LanguageQuizApp.speak_text")
     def test_check_answer_incorrect(self, mock_speak_text):
         word_data = [
-            self.app.WordData(
+            WordData(
                 "cat", "cat.jpg", "cat.mp3", "A small domesticated carnivorous mammal"
             )
         ]
@@ -104,7 +104,7 @@ class TestLanguageQuizApp(unittest.TestCase):
         self.app.questions = word_data
 
         self.app.check_answer(
-            self.app.WordData(
+            WordData(
                 "dog", "dog.jpg", "dog.mp3", "A domesticated carnivorous mammal"
             )
         )
@@ -120,23 +120,23 @@ class TestImagePathForWord(unittest.TestCase):
         self.app.root_dir = "/test/root/dir"
 
     def test_image_path_for_word_valid(self):
-        word_data = self.app.WordData("cat", "cat.jpg", "cat.mp3", "A feline animal")
+        word_data = WordData("cat", "cat.jpg", "cat.mp3", "A feline animal")
         expected_path = "/test/root/dir/word_images/cat.jpg"
         self.assertEqual(self.app.image_path_for_word(word_data), expected_path)
 
     def test_image_path_for_word_no_image(self):
-        word_data = self.app.WordData("dog", "", "dog.mp3", "A canine animal")
+        word_data = WordData("dog", "", "dog.mp3", "A canine animal")
         expected_path = "/test/root/dir/word_images/"
         self.assertEqual(self.app.image_path_for_word(word_data), expected_path)
 
     def test_image_path_for_word_different_extension(self):
-        word_data = self.app.WordData("bird", "bird.png", "bird.mp3", "A flying animal")
+        word_data = WordData("bird", "bird.png", "bird.mp3", "A flying animal")
         expected_path = "/test/root/dir/word_images/bird.png"
         self.assertEqual(self.app.image_path_for_word(word_data), expected_path)
 
     @patch("os.path.join")
     def test_image_path_for_word_os_join_called(self, mock_join):
-        word_data = self.app.WordData("fish", "fish.jpg", "fish.mp3", "An aquatic animal")
+        word_data = WordData("fish", "fish.jpg", "fish.mp3", "An aquatic animal")
         self.app.image_path_for_word(word_data)
         mock_join.assert_called_once_with(self.app.root_dir, "word_images", "fish.jpg")
 

@@ -12,6 +12,8 @@ from playsound import playsound
 
 N_CHOICES = 3
 
+WordData = namedtuple("WordData", ["word", "image", "sound", "definition"])
+
 
 class LanguageQuizApp:
     """
@@ -83,7 +85,6 @@ class LanguageQuizApp:
         )
         self.message_label.pack(pady=10)
 
-        self.WordData = namedtuple("WordData", ["word", "image", "sound", "definition"])
         words_path = os.path.join(self.root_dir, "words.csv")
 
         self.questions = self.load_word_data(words_path)
@@ -140,7 +141,7 @@ class LanguageQuizApp:
         with open(path, newline="", encoding="utf-8") as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
-                new_word = self.WordData(
+                new_word = WordData(
                     word=row["Word"],
                     image=row["Image"],
                     sound=row["Sound"],
