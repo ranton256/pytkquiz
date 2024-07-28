@@ -175,12 +175,16 @@ class LanguageQuizApp:
         playsound(sound_path)
 
     def sound_path_for_word(self, option):
-        return os.path.join(self.root_dir, "word_sounds", str(option.word).lower() + ".mp3")
+        return os.path.join(
+            self.root_dir, "word_sounds", str(option.word).lower() + ".mp3"
+        )
 
     def speak_text(self, text: str):
         safe_name_chars = [c if c.isalnum() else "_" for c in text]
         safe_name = "".join(safe_name_chars)
-        sound_path = os.path.join(self.root_dir, "word_sounds", safe_name.lower() + ".mp3")
+        sound_path = os.path.join(
+            self.root_dir, "word_sounds", safe_name.lower() + ".mp3"
+        )
         self.generate_sound_if_not_found(text, sound_path)
         self.speak_word(sound_path)
 
