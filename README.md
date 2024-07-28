@@ -78,4 +78,5 @@ Project Link: https://github.com/ranton256/pytkquiz
 
 ## Acknowledgments
 
-- This app makes use of the gTTS library for text to speech, and most of the images were generated using Google Gemini and GPT-4o.
+- This app makes use of the gTTS library for text to speech.
+- Most of the images were generated using Google Gemini, GPT-4o, or Adobe Firefly.
