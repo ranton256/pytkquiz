@@ -1,9 +1,6 @@
-import csv
 import os
-import random
 import tkinter as tk
-from collections import namedtuple
-from tkinter import DISABLED, NORMAL, messagebox
+from tkinter import DISABLED, NORMAL
 from typing import Optional, Callable
 
 import gtts  # type: ignore
