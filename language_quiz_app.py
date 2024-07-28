@@ -9,6 +9,8 @@ import csv
 from collections import namedtuple
 
 
+N_CHOICES = 3
+
 class LanguageQuizApp:
     def __init__(self, master=None, image_size=180, frame_factory=tk.Frame, label_factory=tk.Label,
                  button_factory=tk.Button):
@@ -82,17 +84,16 @@ class LanguageQuizApp:
 
     def next_question(self):
         if self.questions:
-            self.current_question = random.choice(self.questions)
+
+            options = random.sample(self.questions, N_CHOICES)
+            self.current_question = options[0]
+            random.shuffle(options)
 
             self.word_label.config(text=self.current_question.word)
             self.message_label.config(text="")
             self.disable_next()
             for widget in self.image_frame.winfo_children():
                 widget.destroy()
-
-            options = random.sample(self.questions, 2)
-            options.append(self.current_question)
-            random.shuffle(options)
 
             for i, option in enumerate(options):
                 photo = self.get_word_image(option)
@@ -101,7 +102,7 @@ class LanguageQuizApp:
                 btn.image = photo
                 btn.grid(row=0, column=i, padx=10, pady=10)
 
-                speak_btn = tk.Button(self.image_frame, text="🔊",
+                speak_btn = tk.Button(self.image_frame, text="🔊Speak",
                                       command=lambda x=option: self.speak_word(self.sound_path_for_word(x)))
                 speak_btn.grid(row=1, column=i, padx=10, pady=5)
 
