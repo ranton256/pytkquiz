@@ -1,7 +1,6 @@
 import csv
 import os
 import random
-import sys
 import tkinter as tk
 from collections import namedtuple
 from tkinter import DISABLED, NORMAL, messagebox
@@ -23,7 +22,7 @@ class LanguageQuizApp:
         button_factory=tk.Button,
     ):
         self.master = master
-
+        self.next_enabled = False
         self.root_dir = os.path.abspath(os.path.join(__file__, "..", ".."))
 
         self.label_factory = label_factory
@@ -76,8 +75,7 @@ class LanguageQuizApp:
         self.next_btn.config(state=DISABLED)
         self.next_enabled = False
 
-    def space_pressed(self, event):
-        print("you hit space")
+    def space_pressed(self):
         if self.next_enabled:
             self.next_question()
 
@@ -165,7 +163,7 @@ class LanguageQuizApp:
             self.speak_text("Yes, that's correct!")
         else:
             self.set_message(
-                f"Sorry, that's incorrect. The correct answer was {self.current_question.word}.\n\nDefinition: {self.current_question.definition}"
+                f"Sorry, that's incorrect. The correct answer was {self.current_question.word}.\n\nDefinition: {self.current_question.definition} "
             )
             self.speak_text("Sorry, that's incorrect!")
 

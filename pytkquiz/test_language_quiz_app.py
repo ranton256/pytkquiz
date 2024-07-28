@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from language_quiz_app import LanguageQuizApp
 
@@ -10,7 +10,7 @@ class FakeLabel(dict):
         self.master = master
         self.update(**kwargs)
 
-    def pack(self, pady=None):
+    def pack(self, _pady=None):
         pass
 
     def config(self, **kwargs):
@@ -24,7 +24,7 @@ class TestLanguageQuizApp(unittest.TestCase):
     @patch("language_quiz_app.os.path.exists")
     @patch("language_quiz_app.csv.DictReader")
     @patch("builtins.open")
-    def test_load_word_data(self, mock_open, mock_csv_dict_reader, mock_os_path_exists):
+    def test_load_word_data(self, _mock_open, mock_csv_dict_reader, mock_os_path_exists):
         mock_csv_dict_reader.return_value = iter(
             [
                 {
