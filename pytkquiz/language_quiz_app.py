@@ -1,6 +1,7 @@
 import csv
 import os
 import random
+import sys
 import tkinter as tk
 from collections import namedtuple
 from tkinter import DISABLED, NORMAL, messagebox
@@ -22,7 +23,8 @@ class LanguageQuizApp:
         button_factory=tk.Button,
     ):
         self.master = master
-        self.word_label = dict()
+
+        self.root_dir = os.path.abspath(os.path.join(__file__, "..", ".."))
 
         self.label_factory = label_factory
         self.button_factory = button_factory
@@ -55,7 +57,9 @@ class LanguageQuizApp:
         self.message_label.pack(pady=10)
 
         self.WordData = namedtuple("WordData", ["word", "image", "sound", "definition"])
-        self.questions = self.load_word_data("words.csv")
+        words_path = os.path.join(self.root_dir, "words.csv")
+
+        self.questions = self.load_word_data(words_path)
         self.current_question = None
         self.score = 0
 
@@ -171,12 +175,12 @@ class LanguageQuizApp:
         playsound(sound_path)
 
     def sound_path_for_word(self, option):
-        return os.path.join("word_sounds", str(option.word).lower() + ".mp3")
+        return os.path.join(self.root_dir, "word_sounds", str(option.word).lower() + ".mp3")
 
     def speak_text(self, text: str):
         safe_name_chars = [c if c.isalnum() else "_" for c in text]
         safe_name = "".join(safe_name_chars)
-        sound_path = os.path.join("word_sounds", safe_name.lower() + ".mp3")
+        sound_path = os.path.join(self.root_dir, "word_sounds", safe_name.lower() + ".mp3")
         self.generate_sound_if_not_found(text, sound_path)
         self.speak_word(sound_path)
 
@@ -186,7 +190,7 @@ class LanguageQuizApp:
             tts.save(sound_path)
 
     def image_path_for_word(self, option):
-        image_path = f"word_images/{option.image}"
+        image_path = os.path.join(self.root_dir, "word_images", option.image)
         return image_path
 
 
