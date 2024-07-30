@@ -44,8 +44,18 @@ class StreamlitLanguageQuizApp:
             st.metric("Attempts", st.session_state.attempts)
 
         # Display word
-        st.header(st.session_state.current_question.word)
-
+        st.subheader(st.session_state.current_question.word, divider=True)
+        st.write("""
+                          <style>
+                            div[data-testid="stHeading"] h3 {
+                                font-size: 48px!important;
+                                font-weight: bold!important;
+                                text-align: center!important;
+                                color: #0000c0!important;
+                                
+                            }
+                          </style>
+                          """, unsafe_allow_html=True)
         # Display images
         cols = st.columns(3)
         for i, option in enumerate(st.session_state.options):
@@ -56,7 +66,9 @@ class StreamlitLanguageQuizApp:
                 self.audio_element_for_word(option.word)
 
                 if st.button(f"Select {option.word}", key=f"select_{i}"):
-                    self.check_answer(option)
+                    if not st.session_state.answered:
+                        self.check_answer(option)
+                    # TODO: get this to not let them change their answer.
 
         # Display message
         if 'message' in st.session_state:
@@ -69,22 +81,22 @@ class StreamlitLanguageQuizApp:
                 st.rerun(scope="fragment")
 
     def run(self):
-        st.title("Language Quiz App")
+        st.title("Sight Words Quiz")
         # Display score
 
         self.show_word()
-
-
 
     def check_answer(self, selected_option: WordData):
         correct = self.quiz_logic.check_answer(selected_option)
         if correct:
             st.session_state.message = f"That's correct! \n\nDefinition: {st.session_state.current_question.definition}"
             self.speak_text("Yes, that's correct!")
+            st.balloons()
         else:
             st.session_state.message = f"""Sorry, that's incorrect. The correct answer was {st.session_state.current_question.word}.
             Definition: {st.session_state.current_question.definition}"""
             self.speak_text("Sorry, that's incorrect!")
+            st.subheader("Sorry :sob:")
 
         st.session_state.score = self.quiz_logic.score
         st.session_state.attempts = self.quiz_logic.attempts
