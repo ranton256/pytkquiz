@@ -127,7 +127,7 @@ class StreamlitLanguageQuizApp:
                   """, unsafe_allow_html=True)
 
         with st.container():
-            audio_elem = st.audio(audio_bytes, format='audio/mp3', autoplay=autoplay)
+            audio_elem = st.audio(audio_bytes, format='audio/mpeg', autoplay=autoplay)
             if hidden:
                 st.write('<span class="hide-the-container"/>', unsafe_allow_html=True)
 
