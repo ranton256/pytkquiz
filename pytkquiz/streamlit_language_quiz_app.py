@@ -65,7 +65,7 @@ class StreamlitLanguageQuizApp:
                 st.image(image, use_column_width=True)
                 self.audio_element_for_word(option.word)
 
-                if st.button(f"Select {option.word}", key=f"select_{i}"):
+                if st.button(f"Select", key=f"select_{i}"):
                     if not st.session_state.answered:
                         self.check_answer(option)
                     # TODO: get this to not let them change their answer.
