@@ -12,6 +12,7 @@ class QuizLogic:
         self.questions = []
         self.current_question = None
         self.score = 0
+        self.attempts = 0
 
     def load_word_data(self, path):
         word_data = []
@@ -44,6 +45,7 @@ class QuizLogic:
         return None
 
     def check_answer(self, selected_option):
+        self.attempts += 1
         if selected_option == self.current_question:
             self.score += 1
             return True
@@ -51,6 +53,9 @@ class QuizLogic:
 
     def get_score(self):
         return self.score
+
+    def get_attempts(self):
+        return self.attempts
 
     def image_path_for_word(self, option):
         image_path = os.path.join(self.root_dir, "word_images", option.image)

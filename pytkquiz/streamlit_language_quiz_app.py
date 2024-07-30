@@ -2,6 +2,7 @@ import os
 import streamlit as st
 from PIL import Image
 import gtts
+import base64
 
 from streamlit.components.v1 import html
 
@@ -22,6 +23,8 @@ class StreamlitLanguageQuizApp:
         else:
             self.quiz_logic.current_question = st.session_state.current_question
             self.quiz_logic.options = st.session_state.options
+            self.quiz_logic.score = st.session_state.score
+            self.quiz_logic.attempts = st.session_state.attempts
 
     def next_question(self):
         options = self.quiz_logic.next_question()
@@ -29,9 +32,17 @@ class StreamlitLanguageQuizApp:
         st.session_state.options = options
         st.session_state.answered = False
         st.session_state.message = ''
+        st.session_state.score = self.quiz_logic.score
+        st.session_state.attempts = self.quiz_logic.attempts
 
     @st.fragment
     def show_word(self):
+        c1, c2 = st.columns(2)
+        with c1:
+            st.metric("Score", st.session_state.score)
+        with c2:
+            st.metric("Attempts", st.session_state.attempts)
+
         # Display word
         st.header(st.session_state.current_question.word)
 
@@ -42,11 +53,10 @@ class StreamlitLanguageQuizApp:
                 image_path = self.quiz_logic.image_path_for_word(option)
                 image = Image.open(image_path)
                 st.image(image, use_column_width=True)
+                self.audio_element_for_word(option.word)
 
                 if st.button(f"Select {option.word}", key=f"select_{i}"):
                     self.check_answer(option)
-
-                self.audio_element_for_word(option.word)
 
         # Display message
         if 'message' in st.session_state:
@@ -60,10 +70,11 @@ class StreamlitLanguageQuizApp:
 
     def run(self):
         st.title("Language Quiz App")
+        # Display score
+
         self.show_word()
 
-        # Display score
-        st.sidebar.metric("Score", self.quiz_logic.score)
+
 
     def check_answer(self, selected_option: WordData):
         correct = self.quiz_logic.check_answer(selected_option)
@@ -75,6 +86,8 @@ class StreamlitLanguageQuizApp:
             Definition: {st.session_state.current_question.definition}"""
             self.speak_text("Sorry, that's incorrect!")
 
+        st.session_state.score = self.quiz_logic.score
+        st.session_state.attempts = self.quiz_logic.attempts
         st.session_state.answered = True
 
     def audio_element_for_word(self, word: str):
@@ -90,9 +103,21 @@ class StreamlitLanguageQuizApp:
         self.generate_sound_if_not_found(word, sound_path)
         audio_file = open(sound_path, 'rb')
         audio_bytes = audio_file.read()
-        audio_elem = st.audio(audio_bytes, format='audio/mp3', autoplay=autoplay)
-        if hidden:
-            st.markdown('<style>audio {display: none}</style>', unsafe_allow_html=True)
+        st.write("""
+                  <style>
+                    div[data-testid="stVerticalBlockBorderWrapper"]:has(
+                      >div>div>div[data-testid="element-container"] 
+                      .hide-the-container
+                    ) {
+                      display: none; 
+                    }
+                  </style>
+                  """, unsafe_allow_html=True)
+
+        with st.container():
+            audio_elem = st.audio(audio_bytes, format='audio/mp3', autoplay=autoplay)
+            if hidden:
+                st.write('<span class="hide-the-container"/>', unsafe_allow_html=True)
 
         return audio_elem
 
