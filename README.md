@@ -1,6 +1,14 @@
-# PyTkQuiz
+# Sight Words app in Streamlit and Tkinter
+
+The [Streamlit](HTTP://streamlit.io) version is available in [Streamlit Community Cloud](https://share.streamlit.io) at <https://sight-words.streamlit.app/>
 
 PyTkQuiz is a desktop GUI application built with Python and Tkinter, designed to help language learners improve their vocabulary through an interactive quiz format.
+
+## Feedback
+
+If you have feedback on the app, you can add it to the Streamlit discussion forum at https://discuss.streamlit.io/t/sight-words-flash-card-streamlit-app-to-help-young-readers/81385.
+
+
 
 ## Features
 
@@ -10,7 +18,7 @@ PyTkQuiz is a desktop GUI application built with Python and Tkinter, designed to
 - Score tracking to monitor progress
 - Simple and intuitive user interface
 
-## Installation
+## PyTkQuiz Installation
 
 To run PyTkQuiz, you'll need Python 3.x installed on your system. Follow these steps to get started:
 
