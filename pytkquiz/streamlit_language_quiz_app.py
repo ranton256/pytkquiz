@@ -7,6 +7,7 @@ import base64
 from streamlit.components.v1 import html
 from streamlit_card import card
 
+from sound_gen import generate_sound_if_not_found
 from quiz_logic import QuizLogic, WordData
 
 
@@ -16,9 +17,10 @@ class StreamlitLanguageQuizApp:
         self.question_fragment = None
         self.root_dir = os.path.abspath(os.path.join(__file__, "..", ".."))
         self.quiz_logic = QuizLogic(root_dir=self.root_dir)
-        words_path = os.path.join(self.root_dir, "words.csv")
-        word_col_index = 0
-        self.quiz_logic.load_word_data(words_path, word_col_index)
+        self.language = 'en'
+        #words_path = os.path.join(self.root_dir, "words.csv")
+
+        self.update_language(load_next=False)
 
         if 'current_question' not in st.session_state:
             self.next_question()
@@ -27,6 +29,18 @@ class StreamlitLanguageQuizApp:
             self.quiz_logic.options = st.session_state.options
             self.quiz_logic.score = st.session_state.score
             self.quiz_logic.attempts = st.session_state.attempts
+
+    def update_language(self, load_next=True):
+        if self.language == "en":
+            words_path = os.path.join(self.root_dir, "words.csv")
+        else:
+            words_path = os.path.join(self.root_dir, "words_" + self.language + ".csv")
+        word_col_index = 0 if self.language == "en" else 4
+        self.quiz_logic = QuizLogic(root_dir=self.root_dir, language=self.language)
+        self.quiz_logic.load_word_data(words_path, word_col_index)
+
+        if load_next:
+            self.next_question()
 
     def next_question(self):
         options = self.quiz_logic.next_question()
@@ -39,6 +53,23 @@ class StreamlitLanguageQuizApp:
 
     @st.fragment
     def show_word(self):
+
+        lang_name = st.selectbox(
+            "Select Language",
+            ['English', 'Ελληνικά'],
+            index=0,
+            key="language_selectbox"
+        )
+        lang_map = {
+            'English': 'en',
+            'Ελληνικά': 'el'
+        }
+        language = lang_map[lang_name]
+
+        if self.language != language:
+            self.language = language
+            self.update_language()
+
         c1, c2 = st.columns(2)
 
         with c1:
@@ -77,7 +108,7 @@ class StreamlitLanguageQuizApp:
                 image_path = self.quiz_logic.image_path_for_word(option)
                 image = Image.open(image_path)
                 st.image(image, use_column_width=True)
-                self.audio_element_for_word(option.word)
+                self.audio_element_for_word(option)
 
                 if st.button(f"Select", key=f"select_{i}"):
                     if not st.session_state.answered:
@@ -114,9 +145,9 @@ class StreamlitLanguageQuizApp:
         st.session_state.attempts = self.quiz_logic.attempts
         st.session_state.answered = True
 
-    def audio_element_for_word(self, word: str):
-        sound_path = self.quiz_logic.sound_path_for_word(WordData(word, "", "", ""))
-        return self.show_audio(sound_path, word)
+    def audio_element_for_word(self, word: WordData):
+        sound_path = self.quiz_logic.sound_path_for_word(word)
+        return self.show_audio(sound_path, word.word)
 
     def speak_text(self, text: str):
         safe_name = ''.join(c if c.isalnum() else "_" for c in text)
@@ -124,7 +155,7 @@ class StreamlitLanguageQuizApp:
         return self.show_audio(sound_path, safe_name, hidden=True, autoplay=True)
 
     def show_audio(self, sound_path, word, hidden=False, autoplay=False):
-        self.generate_sound_if_not_found(word, sound_path)
+        generate_sound_if_not_found(self.language, word, sound_path)
         audio_file = open(sound_path, 'rb')
         audio_bytes = audio_file.read()
         st.write("""
@@ -145,12 +176,12 @@ class StreamlitLanguageQuizApp:
 
         return audio_elem
 
-    @staticmethod
-    def generate_sound_if_not_found(text, sound_path: str):
-        # TODO: update for lang
-        if not os.path.exists(sound_path):
-            tts = gtts.gTTS(text)
-            tts.save(sound_path)
+    # @staticmethod
+    # def generate_sound_if_not_found(text, sound_path: str):
+    #     # TODO: update for lang
+    #     if not os.path.exists(sound_path):
+    #         tts = gtts.gTTS(text)
+    #         tts.save(sound_path)
 
 
 if __name__ == "__main__":

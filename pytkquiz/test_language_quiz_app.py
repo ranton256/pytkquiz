@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 
 from language_quiz_app import LanguageQuizApp
+from pytkquiz.sound_gen import generate_sound_if_not_found
 from quiz_logic import WordData
 
 
@@ -29,7 +30,7 @@ class TestLanguageQuizApp(unittest.TestCase):
     def test_generate_sound_if_not_found(self, mock_os_path_exists, mock_gtts_save):
         mock_os_path_exists.return_value = False
 
-        self.app.generate_sound_if_not_found("test text", "dummy_path.mp3")
+        generate_sound_if_not_found(self.app.language, "test text", "dummy_path.mp3")
 
         mock_gtts_save.assert_called_once()
 
@@ -99,7 +100,7 @@ class TestGenerateSoundIfNotFound(unittest.TestCase):
     @patch("language_quiz_app.gtts.gTTS")
     def test_generate_sound_if_not_found_existing_file(self, mock_gtts, mock_exists):
         mock_exists.return_value = True
-        self.app.generate_sound_if_not_found("hello", "hello.mp3")
+        generate_sound_if_not_found(self.app.language, "hello", "hello.mp3")
         mock_gtts.assert_not_called()
 
     @patch("language_quiz_app.os.path.exists")
@@ -107,7 +108,7 @@ class TestGenerateSoundIfNotFound(unittest.TestCase):
     def test_generate_sound_if_not_found_new_file(self, mock_gtts, mock_exists):
         mock_exists.return_value = False
         mock_tts_instance = mock_gtts.return_value
-        self.app.generate_sound_if_not_found("world", "world.mp3")
+        generate_sound_if_not_found(self.app.language, "world", "world.mp3")
         mock_gtts.assert_called_once_with("world")
         mock_tts_instance.save.assert_called_once_with("world.mp3")
 
@@ -115,14 +116,14 @@ class TestGenerateSoundIfNotFound(unittest.TestCase):
     @patch("language_quiz_app.gtts.gTTS")
     def test_generate_sound_if_not_found_empty_text(self, mock_gtts, mock_exists):
         mock_exists.return_value = False
-        self.app.generate_sound_if_not_found("", "empty.mp3")
+        generate_sound_if_not_found(self.app.language, "", "empty.mp3")
         mock_gtts.assert_called_once_with("")
 
     @patch("language_quiz_app.os.path.exists")
     @patch("language_quiz_app.gtts.gTTS")
     def test_generate_sound_if_not_found_special_characters(self, mock_gtts, mock_exists):
         mock_exists.return_value = False
-        self.app.generate_sound_if_not_found("Hello, World!", "special.mp3")
+        generate_sound_if_not_found(self.app.language, "Hello, World!", "special.mp3")
         mock_gtts.assert_called_once_with("Hello, World!")
 
 

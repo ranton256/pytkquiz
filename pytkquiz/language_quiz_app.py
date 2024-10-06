@@ -8,6 +8,7 @@ from PIL import Image, ImageTk
 from PIL.ImageTk import PhotoImage
 from playsound import playsound
 
+from pytkquiz.sound_gen import generate_sound_if_not_found
 from quiz_logic import QuizLogic, WordData
 
 N_CHOICES = 3
@@ -188,7 +189,7 @@ class LanguageQuizApp:
             speak_btn.grid(row=1, column=i, padx=10, pady=5)
 
             sound_path = self.quiz_logic.sound_path_for_word(option)
-            self.generate_sound_if_not_found(option.word, sound_path)
+            generate_sound_if_not_found(self.language, option.word, sound_path)
 
     def get_word_image(self, option: WordData) -> PhotoImage or None:
         """
@@ -254,27 +255,8 @@ class LanguageQuizApp:
             self.root_dir, "word_sounds", safe_name.lower() + ".mp3"
         )
 
-        self.generate_sound_if_not_found(text, sound_path)
+        generate_sound_if_not_found(self.language, text, sound_path)
         self.speak_word(sound_path)
-
-    def generate_sound_if_not_found(self, text, sound_path: str):
-        """
-        Generates a sound file for the given text if it doesn't already exist.
-
-        Args:
-            text (str): The text to generate the sound file for.
-            sound_path (str): The path to save the generated sound file.
-
-        Returns:
-            None
-        """
-        if not os.path.exists(sound_path):
-            if self.language == "en":
-                tts = gtts.gTTS(text)
-            else:
-                tts = gtts.gTTS(text, lang=self.language, slow=False)
-            tts.save(sound_path)
-            print(f"Generated sound for {sound_path}")
 
     @property
     def score(self):
