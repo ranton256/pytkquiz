@@ -5,6 +5,7 @@ import gtts
 import base64
 
 from streamlit.components.v1 import html
+from streamlit_card import card
 
 from quiz_logic import QuizLogic, WordData
 
@@ -38,24 +39,36 @@ class StreamlitLanguageQuizApp:
     @st.fragment
     def show_word(self):
         c1, c2 = st.columns(2)
+
         with c1:
             st.metric("Score", st.session_state.score)
         with c2:
             st.metric("Attempts", st.session_state.attempts)
 
-        # Display word
-        st.subheader(st.session_state.current_question.word, divider=True)
-        st.write("""
-                          <style>
-                            div[data-testid="stHeading"] h3 {
-                                font-size: 48px!important;
-                                font-weight: bold!important;
-                                text-align: center!important;
-                                color: #0000c0!important;
-                                
-                            }
-                          </style>
-                          """, unsafe_allow_html=True)
+        res = card(
+            title=st.session_state.current_question.word,
+            text="",
+            styles={
+                "card": {
+                    "width": "100%",
+                    "height": "200px",
+                    "border-radius": "40px",
+                    "box-shadow": "0 0 10px rgba(0,0,0,0.5)",
+                    "background-color": "#fff",
+                    "font-size": "48px!important;",
+                    "font-weight": "bold!important",
+                    "font-family": "Arial, sans-serif!important",
+                },
+                "title": {
+                    "color": "#0000c0",
+                    "background-color": "#fff",
+                },
+                "filter": {
+                    "background-color": "rgba(0, 0, 0, 0)"  # <- make the image not dimmed anymore
+                }
+            },
+        )
+
         # Display images
         cols = st.columns(3)
         for i, option in enumerate(st.session_state.options):
@@ -82,8 +95,6 @@ class StreamlitLanguageQuizApp:
 
     def run(self):
         st.title("Sight Words Quiz")
-        # Display score
-
         self.show_word()
 
     def check_answer(self, selected_option: WordData):
