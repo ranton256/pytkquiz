@@ -3,27 +3,37 @@ import os
 import random
 from collections import namedtuple
 
-WordData = namedtuple("WordData", ["word", "image", "sound", "definition"])
+WordData = namedtuple("WordData", ["word", "image", "sound", "definition", "filename"])
 
 
 class QuizLogic:
-    def __init__(self, root_dir):
+    def __init__(self, root_dir, language:str = "en"):
         self.root_dir = root_dir
         self.questions = []
         self.current_question = None
         self.score = 0
         self.attempts = 0
+        self.language = language
 
-    def load_word_data(self, path):
+    def load_word_data(self, path, word_col_index):
         word_data = []
         with open(path, newline="", encoding="utf-8") as csvfile:
             reader = csv.DictReader(csvfile)
+            col_names = reader.fieldnames
+            if word_col_index < 0 or word_col_index >= len(col_names):
+                raise ValueError(
+                    f"Invalid word column index: {word_col_index}. Must be between 0 and {len(col_names) - 1}."
+                )
+            word_col_name = col_names[word_col_index]
             for row in reader:
+                filename = row['Word'] if self.language == 'en' else row['Transliteration']
+                filename = filename.lower()
                 new_word = WordData(
-                    word=row["Word"],
+                    word=row[word_col_name],
                     image=row["Image"],
                     sound=row["Sound"],
                     definition=row["Definition"],
+                    filename=filename,
                 )
                 image_path = self.image_path_for_word(new_word)
                 if not os.path.exists(image_path):
@@ -62,8 +72,10 @@ class QuizLogic:
         return image_path
 
     def sound_path_for_word(self, option):
+        sound_dir = "word_sounds" if self.language == "en" else f"word_sounds_{self.language}"
+        filename = option.filename
         return os.path.join(
-            self.root_dir, "word_sounds", str(option.word).lower() + ".mp3"
+            self.root_dir, sound_dir, filename + ".mp3"
         )
 
     def set_questions(self, word_data):

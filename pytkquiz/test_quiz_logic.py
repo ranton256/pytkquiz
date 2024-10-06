@@ -17,7 +17,7 @@ class TestQuizLogic(unittest.TestCase):
             {"Word": "banana", "Image": "banana.jpg", "Sound": "banana.mp3", "Definition": "A yellow fruit"}
         ]
 
-        word_data = self.quiz_logic.load_word_data("dummy_path")
+        word_data = self.quiz_logic.load_word_data("dummy_path", word_col_index)
 
         self.assertEqual(len(word_data), 2)
         self.assertEqual(word_data[0].word, "apple")
@@ -33,7 +33,7 @@ class TestQuizLogic(unittest.TestCase):
             {"Word": "banana", "Image": "banana.jpg", "Sound": "banana.mp3", "Definition": "A yellow fruit"}
         ]
 
-        word_data = self.quiz_logic.load_word_data("dummy_path")
+        word_data = self.quiz_logic.load_word_data("dummy_path", word_col_index)
 
         self.assertEqual(len(word_data), 1)
         self.assertEqual(word_data[0].word, "apple")
@@ -45,7 +45,7 @@ class TestQuizLogic(unittest.TestCase):
         mock_exists.return_value = True
         mock_reader.return_value = []
 
-        word_data = self.quiz_logic.load_word_data("dummy_path")
+        word_data = self.quiz_logic.load_word_data("dummy_path", word_col_index)
 
         self.assertEqual(len(word_data), 0)
 
@@ -58,7 +58,7 @@ class TestQuizLogic(unittest.TestCase):
             {"Word": "café", "Image": "cafe.jpg", "Sound": "cafe.mp3", "Definition": "A place to drink coffee"}
         ]
 
-        word_data = self.quiz_logic.load_word_data("dummy_path")
+        word_data = self.quiz_logic.load_word_data("dummy_path", word_col_index)
 
         self.assertEqual(len(word_data), 1)
         self.assertEqual(word_data[0].word, "café")
@@ -74,7 +74,7 @@ class TestQuizLogic(unittest.TestCase):
         ]
 
         with self.assertRaises(KeyError):
-            self.quiz_logic.load_word_data("dummy_path")
+            self.quiz_logic.load_word_data("dummy_path", word_col_index)
 
 
 class TestImagePathForWord(unittest.TestCase):

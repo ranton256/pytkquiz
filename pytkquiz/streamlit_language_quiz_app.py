@@ -17,7 +17,8 @@ class StreamlitLanguageQuizApp:
         self.root_dir = os.path.abspath(os.path.join(__file__, "..", ".."))
         self.quiz_logic = QuizLogic(root_dir=self.root_dir)
         words_path = os.path.join(self.root_dir, "words.csv")
-        self.quiz_logic.load_word_data(words_path)
+        word_col_index = 0
+        self.quiz_logic.load_word_data(words_path, word_col_index)
 
         if 'current_question' not in st.session_state:
             self.next_question()
@@ -146,6 +147,7 @@ class StreamlitLanguageQuizApp:
 
     @staticmethod
     def generate_sound_if_not_found(text, sound_path: str):
+        # TODO: update for lang
         if not os.path.exists(sound_path):
             tts = gtts.gTTS(text)
             tts.save(sound_path)

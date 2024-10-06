@@ -21,9 +21,7 @@ class FakeLabel(dict):
 
 class TestLanguageQuizApp(unittest.TestCase):
     def setUp(self):
-        self.app = LanguageQuizApp(label_factory=FakeLabel,
-                                   button_factory=MagicMock(),
-                                   frame_factory=MagicMock(),
+        self.app = LanguageQuizApp(frame_factory=MagicMock(), label_factory=FakeLabel, button_factory=MagicMock(),
                                    image_factory=MagicMock())
 
     @patch("language_quiz_app.gtts.gTTS.save")

@@ -52,7 +52,9 @@ class LanguageQuizApp:
 
         The constructor sets up the initial state of the application, including the GUI elements, score tracking,
         and loading the word data. It also binds the space key press event to the `next_question` method.
+        :param language:
         """
+
         self.master = master
         self.next_enabled = False
         self.root_dir = os.path.abspath(os.path.join(__file__, "..", ".."))
@@ -62,7 +64,17 @@ class LanguageQuizApp:
         self.button_factory = button_factory
         self.image_factory = image_factory
 
-        self.image_size = image_size
+        self.language_chooser = self.label_factory(master, text="Choose a language:")
+        self.language_chooser.pack(pady=10)
+        self.language_chooser.config(font=("Arial", 16))
+
+        lang_options = ['Greek', 'English']  #TODO: reverse
+        chosen_lang = tk.StringVar(value=lang_options[0])
+        self.chosen_lang = chosen_lang
+
+        lang_menu = tk.OptionMenu(master, chosen_lang, *lang_options, command=self.update_language)
+        self.lang_menu = lang_menu
+        lang_menu.pack(pady=10)
 
         if self.master:
             self.master.title("Language Quiz App")
@@ -89,13 +101,33 @@ class LanguageQuizApp:
         )
         self.message_label.pack(pady=10)
 
-        words_path = os.path.join(self.root_dir, "words.csv")
-
-        self.quiz_logic = QuizLogic(root_dir=self.root_dir)
-        self.quiz_logic.load_word_data(words_path)
+        self.image_size = image_size
 
         if master:
             master.bind("<space>", self.space_pressed)
+
+        self.update_language()
+
+    def update_language(self, *args):
+        """
+        Update the language based on the selected language name.
+        """
+
+        lang_name = self.chosen_lang.get()
+        lang_map = {
+            'English': 'en',
+            'Greek': 'el'
+        }
+        self.language = lang_map[lang_name]
+
+        if self.language == "en":
+            words_path = os.path.join(self.root_dir, "words.csv")
+        else:
+            words_path = os.path.join(self.root_dir, "words_" + self.language + ".csv")
+        word_col_index = 0 if self.language == "en" else 4
+
+        self.quiz_logic = QuizLogic(root_dir=self.root_dir, language=self.language)
+        self.quiz_logic.load_word_data(words_path, word_col_index)
 
         self.next_question()
 
@@ -182,7 +214,7 @@ class LanguageQuizApp:
         return self.message_label["text"]
 
     def check_answer(self, selected_option: WordData) -> bool:
-        correct =  self.quiz_logic.check_answer(selected_option)
+        correct = self.quiz_logic.check_answer(selected_option)
         if correct:
             self.score_label.config(text=f"Score: {self.quiz_logic.score}")
             self.set_message(
@@ -213,16 +245,19 @@ class LanguageQuizApp:
         Returns:
             None
         """
+        # TODO: not sure if we need this filtering.
+        text = text.lower()
         safe_name_chars = [c if c.isalnum() else "_" for c in text]
         safe_name = "".join(safe_name_chars)
+
         sound_path = os.path.join(
             self.root_dir, "word_sounds", safe_name.lower() + ".mp3"
         )
+
         self.generate_sound_if_not_found(text, sound_path)
         self.speak_word(sound_path)
 
-    @staticmethod
-    def generate_sound_if_not_found(text, sound_path: str):
+    def generate_sound_if_not_found(self, text, sound_path: str):
         """
         Generates a sound file for the given text if it doesn't already exist.
 
@@ -234,8 +269,12 @@ class LanguageQuizApp:
             None
         """
         if not os.path.exists(sound_path):
-            tts = gtts.gTTS(text)
+            if self.language == "en":
+                tts = gtts.gTTS(text)
+            else:
+                tts = gtts.gTTS(text, lang=self.language, slow=False)
             tts.save(sound_path)
+            print(f"Generated sound for {sound_path}")
 
     @property
     def score(self):
