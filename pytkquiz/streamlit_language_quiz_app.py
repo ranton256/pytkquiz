@@ -55,7 +55,7 @@ class StreamlitLanguageQuizApp:
     def show_word(self):
 
         lang_name = st.selectbox(
-            "Select Language",
+            "Select Language:",
             ['English', 'Ελληνικά'],
             index=0,
             key="language_selectbox"
